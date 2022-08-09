@@ -134,10 +134,6 @@ export default class PreviewPage extends React.Component {
 
     window.history.replaceState(null, '', `/${bufnr}`)
 
-  componentDidMount() {
-    this.handleCatalogToggle()  // Show by default.
-    window.addEventListener('scroll', this.handleScrollBody)
-
     const socket = io({
       query: {
         bufnr
@@ -164,6 +160,9 @@ export default class PreviewPage extends React.Component {
   }
 
   componentDidMount() {
+    this.handleCatalogToggle()  // Show by default.
+    window.addEventListener('scroll', this.handleScrollBody)
+
     this.startSocket(parseFloat(window.location.pathname.split('/')[2]))
   }
 
@@ -318,6 +317,7 @@ export default class PreviewPage extends React.Component {
         }
         refreshScroll()
       })
+      if (this.catalog) this.catalog.refresh()
     }
 
     if (!this.preContent) {
@@ -334,7 +334,6 @@ export default class PreviewPage extends React.Component {
         }, 16);
       }
     }
-    if (this.catalog) this.catalog.refresh()
   }
 
   render() {
