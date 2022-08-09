@@ -87,7 +87,8 @@ export default class PreviewPage extends React.Component {
       cursor: '',
       content: '',
       pageTitle: '',
-      theme: '',
+      theme: 'light',
+      catalogDisplay: false,
       themeModeIsVisible: false,
       contentEditable: false,
       disableFilename: 1
@@ -95,12 +96,23 @@ export default class PreviewPage extends React.Component {
     this.showThemeButton = this.showThemeButton.bind(this)
     this.hideThemeButton = this.hideThemeButton.bind(this)
     this.handleThemeChange = this.handleThemeChange.bind(this)
+    this.handleCatalogToggle = this.handleCatalogToggle.bind(this)
   }
 
   handleThemeChange() {
     this.setState((state) => ({
       theme: state.theme === 'light' ? 'dark' : 'light',
     }))
+  }
+
+  handleCatalogToggle() {
+    this.setState((state) => ({
+      catalogDisplay: state.catalogDisplay ? false : true,
+    }))
+  }
+
+  handleScrollBody = e => {
+    if (this.catalog) this.catalog.highlightCurrentHeader()
   }
 
   showThemeButton() {
@@ -121,6 +133,10 @@ export default class PreviewPage extends React.Component {
     const tmpSocket = window.socket
 
     window.history.replaceState(null, '', `/${bufnr}`)
+
+  componentDidMount() {
+    this.handleCatalogToggle()  // Show by default.
+    window.addEventListener('scroll', this.handleScrollBody)
 
     const socket = io({
       query: {
@@ -152,6 +168,10 @@ export default class PreviewPage extends React.Component {
   }
 
   onConnect() {
+    if (!this.catalog) {
+      this.catalog = new Catalog('scroll-container', 'markdown-body')
+    }
+    if (this.catalog) this.catalog.refresh()
     console.log('connect success')
   }
 
@@ -314,6 +334,7 @@ export default class PreviewPage extends React.Component {
         }, 16);
       }
     }
+    if (this.catalog) this.catalog.refresh()
   }
 
   render() {
@@ -322,6 +343,7 @@ export default class PreviewPage extends React.Component {
       content,
       name,
       pageTitle,
+      catalogDisplay,
       themeModeIsVisible,
       contentEditable,
       disableFilename,
@@ -349,6 +371,7 @@ export default class PreviewPage extends React.Component {
           <script type="text/javascript" src="/_static/flowchart@1.13.0.min.js"></script>
           <script type="text/javascript" src="/_static/viz.js"></script>
           <script type="text/javascript" src="/_static/full.render.js"></script>
+          <script type="text/javascript" src="/_static/catalog.js"></script>
         </Head>
         <main data-theme={this.state.theme}>
           <div id="page-ctn" contentEditable={contentEditable ? 'true' : 'false'}>
@@ -375,6 +398,17 @@ export default class PreviewPage extends React.Component {
                   {name}
                 </h3>
                 {themeModeIsVisible && (
+                  <label id="toggle-catalog" for="checkbox-catalog">
+                    <input
+                      id="checkbox-catalog"
+                      type="checkbox"
+                      checked={catalogDisplay}
+                      onChange={this.handleCatalogToggle}
+                    />
+                    <span>Side TOC</span>
+                  </label>
+                )}
+                {themeModeIsVisible && (
                   <label id="toggle-theme" for="theme">
                     <input
                       id="theme"
@@ -387,6 +421,9 @@ export default class PreviewPage extends React.Component {
                )}
               </header>
             }
+            <div class="catalog" style={{display: catalogDisplay ? '' : 'none'}}>
+              <div class="scroll-container">TOC</div>
+            </div>
             <section
               className="markdown-body"
               dangerouslySetInnerHTML={{

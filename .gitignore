@@ -1,6 +1,8 @@
 *.s[a-w][a-z]
 *.un~
 Session.vim
+*.vimproject
+.exvim.*/
 .netrwhist
 *~
 /doc/tags
@@ -73,3 +75,4 @@ typings/
 
 app/.next/
 app/bin/
+app/*.tsbuildinfo
