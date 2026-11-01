@@ -43,8 +43,14 @@
           }
           currentDeep = deep;
         } else { html += '</li>'; }
+        // 取第一个带 href 的 a: 标题内可能有用户手写锚点 <a id="..."/> 无 href
+        var href = h.id ? '#' + h.id : '';
+        var as = h.getElementsByTagName('a');
+        for (var k = 0; k < as.length; k++) {
+          if (as[k].getAttribute('href')) { href = as[k].getAttribute('href'); break; }
+        }
         html += '<li><a id="catalog_header_' + i + '" href="';
-        html += h.getElementsByTagName('a')[0].getAttribute('href');
+        html += href;
         html += '">' + h.innerText + '</a>';
       }
       while (currentDeep > 0) { html += '</ul></li>'; currentDeep--; }
